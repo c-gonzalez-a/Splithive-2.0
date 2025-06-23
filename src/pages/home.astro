@@ -1,0 +1,160 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Button } from "@nextui-org/react";
+import '../styles/modal.css'
+import '../styles/btn.css'
+import '../styles/global.css'
+import '../styles/groups-cards.css'
+import Header from '../components/Header';
+import GroupsModal from '../components/GroupsModal';
+import CerrarSesion from "../components/cerrarsesion"
+import { navigate } from 'astro:transitions/client';
+
+---
+
+<Layout title="Welcome to Splithive">
+
+    <main>
+
+        <div >
+
+            <!-- <Header /> -->
+            <CerrarSesion client:only></CerrarSesion>
+
+        </div>
+        
+        <div class="home">
+            
+            <img src="../../public/images/myHive.png" style="width:300px;">
+
+            <div id="grupos"></div>
+
+            <div class="btns">
+
+                <button id="crearGrupoBtn" class="btn">Crear grupo</button>
+
+                <a href="/publico">
+                    <button class="btn">Unirme a grupo</button>
+                </a>
+
+                <button id="beesBtn" class="btn">My Bees</button>
+            </div>
+
+            <div id="modal" class="modal" style="display: none;">
+                
+                <div class="modal-content" style={{background: "#FEFCE8" }}>
+                    
+                    <span class="close" id="closeModal">&times;</span>
+
+                    <GroupsModal client:only/>
+
+                </div>
+            </div>
+        </div>
+
+        <script>
+            
+            import { navigate } from "astro:transitions/client";
+            import cargarDatos from "../utils/initLogica";
+            import { getContactos, getUsuarios, getGrupos, getGastos, getHives, getCurrentUser, getUserByUsername } from "../utils/utilities"
+
+            var currentDate = new Date();
+            var currentUser = getCurrentUser();
+            if (!currentUser){
+                navigate("/")
+            } 
+            
+
+            var grupos = getGrupos();
+            var hive_userActual = getHives();
+
+
+            function actualizarListaGrupos() {
+                hive_userActual = getHives()
+                var contenedorGrupos = document.getElementById('grupos');
+                contenedorGrupos.innerHTML = ''; 
+
+                hive_userActual[currentUser].forEach(i => {
+                    var grupo = grupos[i];
+                    var grupoElemento = document.createElement('div');
+
+                    grupoElemento.innerHTML = '<h2>' + grupo.nombre + '</h2><p>Tipo: ' + grupo.tipo;
+                    
+                    if (grupo.tipo === "gastos") {
+                        var cantidadIntegrantes = grupo.integrantes.length + (grupo.invitados?.length ?? 0);
+
+                        grupoElemento.innerHTML += '</h2><p>Cantidad de integrantes: ' + cantidadIntegrantes + '</p>';
+                    }
+
+                    var enlaceDetalle = document.createElement('a');
+                    enlaceDetalle.classList.add('grupo-card');
+                    enlaceDetalle.href = 'grupos/' + (i) + '-' + grupo.tipo;
+                    
+                    enlaceDetalle.appendChild(grupoElemento);
+                    contenedorGrupos.appendChild(enlaceDetalle);
+                });
+            }
+
+            var modal = document.getElementById('modal');
+            var btnAbrirModal = document.getElementById('crearGrupoBtn');
+            var spanCerrar = document.getElementById('closeModal');
+
+            btnAbrirModal.onclick = function() {
+                modal.style.display = 'block';
+            };
+
+            spanCerrar.onclick = function() {
+                modal.style.display = 'none';
+                document.getElementById('integrantesContainer').innerHTML = '';
+            };
+
+            document.getElementById('beesBtn').addEventListener('click', function() {
+                window.location.href = 'bees/bees'; 
+            });
+
+            actualizarListaGrupos();
+        </script>
+    </main>
+</Layout>
+
+<style is:global>
+	.instructions {
+		margin-bottom: 2rem;
+		border: 1px solid rgba(var(--accent-light), 25%);
+		background: linear-gradient(rgba(var(--accent-dark), 66%), rgba(var(--accent-dark), 33%));
+		padding: 1.5rem;
+		border-radius: 8px;
+	}
+	.instructions code {
+		font-size: 0.8em;
+		font-weight: bold;
+		background: rgba(var(--accent-light), 12%);
+		color: rgb(var(--accent-light));
+		border-radius: 4px;
+		padding: 0.3em 0.4em;
+	}
+	.instructions strong {
+		color: rgb(var(--accent-light));
+	}
+
+	.link-card-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
+		gap: 2rem;
+		padding: 0;
+	}
+    
+    
+    .img-logo {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 400px; /* Ajusta el tamaño según tus necesidades */
+    }
+    .page-title {
+        margin-top: 10rem; /* Ajusta el margen superior según tus necesidades */
+        text-align: center;
+        color: burlywood;
+        font-size: 3rem; /* Ajusta el tamaño de la fuente según tus necesidades */
+    }
+</style>

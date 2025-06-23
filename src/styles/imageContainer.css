@@ -1,0 +1,15 @@
+.image-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px;
+    margin-top: 10px;
+  }
+  
+.left-image{
+    height: 50px; /* Set the desired height */
+}
+
+.right-image {
+    height: 80px; /* Set the desired height */
+}

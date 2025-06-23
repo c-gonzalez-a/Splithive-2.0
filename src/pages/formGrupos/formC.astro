@@ -1,0 +1,203 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Card, Button, Link, Textarea } from '@nextui-org/react'
+import '../../styles/global.css'
+import '../../styles/formGroups.css'
+import ImageContainer from '../../components/groupsForms/ImageContainer'
+
+---
+
+<Layout title="New Rec">
+  <main>
+    <Card>
+        <form id="crearRecFormulario">
+            
+            <ImageContainer rightImageSrc='/public/images/recaudacion.png'/>
+                     
+            <div class="form-group">
+
+                <div class="form-group-item" style={{gap: "50px", display:"flex"}}>
+
+                    <div>
+                        <label for="nombreRec">Nombre de la recaudación:</label>
+                        <input type="text" id="nombreRec" name="nombreRec" class="input-field">
+                    </div>
+                    
+                    <div >
+                        
+                        <p>Visibilidad Publica </p>
+
+                        <div class="checkbox-wrapper-7">
+                            <input class="tgl tgl-ios" id="grupoPublico" type="checkbox"/>
+                            <label class="tgl-btn" for="grupoPublico">
+                        </div>
+                        
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <div class="form-group-item">
+                    <label for="objetivo">Dinero a alcanzar:</label>
+                    <input type="number" id="objetivo" name="objetivo" class="input-field">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class='form-group-item'>Mensaje para las abejas-madrinas:</label>
+                <Textarea
+                    labelPlacement="outside"
+                    placeholder="Saludo inicial" id="textSaludo" color="warning"
+                    className='form-group-item'
+                    maxRows={2}
+                    classNames={{
+                        label: ["text-black/50 dark:text-white/90"],
+                        input: ["bg-yellow-300", "text-black/90 dark:text-white/90"],
+                        innerWrapper: "bg-yellow-300",
+                        inputWrapper: [
+                            "shadow-md",
+                            "!bg-yellow-300",
+                            "dark:bg-blue-500/60",
+                            "backdrop-blur-xl",
+                            "backdrop-yellow-300",
+                            "hover:bg-yellow-300",
+                            "dark:hover:bg-default/70",
+                            "group-data-[focus=false]:bg-yellow-200/50",
+                            "dark:group-data-[focus=false]:bg-default/60",
+                            "!cursor-text",
+                        ],
+                    }}
+                />
+                <Textarea
+                    labelPlacement="outside"
+                    placeholder="Cuerpo del mensaje" id="textCuerpo" color="warning"
+                    className='form-group-item max-h-xs'
+                    minRows={4}
+                    classNames={{
+                        label: ["text-black/50 dark:text-white/90"],
+                        input: ["bg-yellow-300", "text-black/90 dark:text-white/90"],
+                        innerWrapper: "bg-yellow-300",
+                        inputWrapper: [
+                            "shadow-md",
+                            "!bg-yellow-300",
+                            "dark:bg-blue-500/60",
+                            "backdrop-blur-xl",
+                            "backdrop-yellow-300",
+                            "hover:bg-yellow-300",
+                            "dark:hover:bg-default/70",
+                            "group-data-[focus=false]:bg-yellow-200/50",
+                            "dark:group-data-[focus=false]:bg-default/60",
+                            "!cursor-text",
+                        ],
+                    }}
+                />
+                <Textarea
+                    labelPlacement="outside"
+                    placeholder="Mensaje final" id="textFinal" color="warning"
+                    className='form-group-item'
+                    maxRows={2}
+                    classNames={{
+                        label: ["text-black/50 dark:text-white/90"],
+                        input: ["bg-yellow-300", "text-black/90 dark:text-white/90"],
+                        innerWrapper: "bg-yellow-300",
+                        inputWrapper: [
+                            "shadow-md",
+                            "!bg-yellow-300",
+                            "dark:bg-blue-500/60",
+                            "backdrop-blur-xl",
+                            "backdrop-yellow-300",
+                            "hover:bg-yellow-300",
+                            "dark:hover:bg-default/70",
+                            "group-data-[focus=false]:bg-yellow-200/50",
+                            "dark:group-data-[focus=false]:bg-default/60",
+                            "!cursor-text",
+                        ],
+                    }}
+                />
+            </div>
+
+
+            <div style={{margin: "20px", display: "flex", gap: "5px"}} >
+                <Button className="submitBtn font-semibold fs-5" type="submit">Crear</Button>
+                <Button id="cerrarFormBtn" as={Link} className="cancelarBtn font-semibold fs-5" href='/home'>Cancelar</Button>
+            </div>
+        </form>
+    </Card>
+
+    <script>
+        import { getGrupos, getHives, getCurrentUser } from "../../utils/utilities"
+
+        var esPublico = false;
+        const grupoPublico = document.getElementById('grupoPublico');
+        grupoPublico.addEventListener('change', function() {
+            if (grupoPublico.checked) {
+                esPublico = true;
+            } else {
+                esPublico = false;
+            }
+        });
+        
+        document.getElementById('crearRecFormulario').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var nombreRec = document.getElementById('nombreRec').value;
+            if (nombreRec === "") {
+                alert("Se debe ingresar un nombre.");
+                window.location.href = '/home';
+                document.getElementById('crearRecFormulario').reset();
+                return;
+            }
+            var objetivo = document.getElementById('objetivo').value;
+            if (objetivo === "" || isNaN(objetivo)) {
+                alert("Se debe ingresar un monto válido.");
+                window.location.href = '/home';
+                document.getElementById('crearRecFormulario').reset();
+                return;
+            }
+
+            const textSaludo = document.getElementById("textSaludo").value;
+            const textCuerpo = document.getElementById("textCuerpo").value;
+            const textFinal = document.getElementById("textFinal").value;
+
+            var currentUserID = getCurrentUser();
+            var grupos = getGrupos();
+
+            var nuevaRec = {
+                nombre: nombreRec, 
+                tipo: "recaudación", 
+                objetivo: objetivo, 
+                donaciones: [],
+                integrantes: [parseInt(currentUserID)],
+                infoSaludo: textSaludo,
+                infoCuerpo: textCuerpo,
+                infoFinal: textFinal,
+                publico: esPublico
+            };
+
+            var maxID = 0;
+            for (const id in grupos) {
+                if (grupos.hasOwnProperty(id)){
+                    if (Number(id) > Number(maxID)){
+                        maxID = Number(id);
+                    }
+                }
+            }
+
+            grupos[maxID + 1] = nuevaRec;
+
+            var hives = getHives();
+
+            hives[currentUserID].push(maxID + 1);
+
+            sessionStorage.setItem('grupos', JSON.stringify(grupos));
+
+            sessionStorage.setItem("hives", JSON.stringify(hives));
+
+            window.location.href = '/home';
+
+            document.getElementById('crearRecFormulario').reset();
+        });
+    </script>
+  </main>
+</Layout>
